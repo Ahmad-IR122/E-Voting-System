@@ -20,3 +20,10 @@ rad.json
 *.flf
 #Test results file
 TestResults.xml
+/.idea/.gitignore
+/.idea/copilot.data.migration.ask2agent.xml
+/E-Voting/E-Voting.iml
+/.idea/E-Voting-System.iml
+/.idea/misc.xml
+/.idea/modules.xml
+/.idea/vcs.xml
