@@ -21,8 +21,9 @@ public class VotingServer implements VotingService {
             System.out.println("Voting Server is running...");
 
         } catch (Exception e) {
-            System.out.println("Voting Server exception: " + e.toString());
+            System.err.println("Failed to verify or generate signature in SignatureUtil:");
             e.printStackTrace();
+            throw new RuntimeException("Failed to verify or generate signature", e);
         }
 
 
