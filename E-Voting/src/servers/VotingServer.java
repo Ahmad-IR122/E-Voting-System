@@ -17,11 +17,12 @@ public class VotingServer implements VotingService {
             VotingServer server = new VotingServer();
             VotingService stub = (VotingService) UnicastRemoteObject.exportObject(server, 0);
             Registry registry = LocateRegistry.createRegistry(3000);
-            registry.rebind("VotingService", stub);
+            registry.bind("VotingService", stub);
             System.out.println("Voting Server is running...");
 
-        } catch (RemoteException e) {
-            throw new RuntimeException(e);
+        } catch (Exception e) {
+            System.out.println("Voting Server exception: " + e.toString());
+            e.printStackTrace();
         }
 
 
