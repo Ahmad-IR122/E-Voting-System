@@ -1,6 +1,7 @@
 package client;
 
 import util.HashUtil;
+import util.SignatureUtil;
 
 import java.time.LocalDateTime;
 import java.util.Scanner;
@@ -36,11 +37,15 @@ public class VotingClient {
         System.out.println("Casting vote for " + candidate + " at " + timestamp);
         String VoteData = voterId + "|" + candidate + "|" + timestamp;
         String hash = HashUtil.generateHash(VoteData);
+        String signature = SignatureUtil.generateSignature(VoteData);
         // Here you would call the VotingService to cast the vote
         // For example: votingService.castVote(voterId, candidate);
         System.out.println("Vote data: " + VoteData + "\n");
         System.out.println("Vote cast successfully!");
         System.out.println("Vote Hash: " + hash);
+        System.out.println("Vote Signature: " + signature);
+        scanner.close();
+
 
 
     }
