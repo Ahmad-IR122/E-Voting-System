@@ -17,11 +17,13 @@ public class VotingServer implements VotingService {
             VotingServer server = new VotingServer();
             VotingService stub = (VotingService) UnicastRemoteObject.exportObject(server, 0);
             Registry registry = LocateRegistry.createRegistry(3000);
-            registry.rebind("VotingService", stub);
+            registry.bind("VotingService", stub);
             System.out.println("Voting Server is running...");
 
-        } catch (RemoteException e) {
-            throw new RuntimeException(e);
+        } catch (Exception e) {
+            System.err.println("Failed to verify or generate signature in SignatureUtil:");
+            e.printStackTrace();
+            throw new RuntimeException("Failed to verify or generate signature", e);
         }
 
 
