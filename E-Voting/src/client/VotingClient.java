@@ -42,13 +42,11 @@ public class VotingClient {
         String VoteData = voterId + "|" + candidate + "|" + timestamp;
         String hash = HashUtil.generateHash(VoteData);
         String signature = SignatureUtil.generateSignature(VoteData);
-        // Here you would call the VotingService to cast the vote
-        // For example: votingService.castVote(voterId, candidate);
+
         Vote vote = new Vote(voterId, candidate, timestamp, hash, signature);
         try {
             Registry registry = LocateRegistry.getRegistry("localhost", 3000);
             VotingService votingService = (VotingService) registry.lookup("VotingService");
-
             String response = votingService.castVote(vote);
             System.out.println("Response from server: " + response);
 
