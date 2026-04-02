@@ -7,9 +7,9 @@ import java.util.ArrayList;
 import java.util.List;
 public class FileUtil {
 
-    private static final String votesFilePath = "util/votes.txt";
-    private static final String votersFilePath = "util/voters.txt";
-    private static final String logFilePath = "util/audit_log.txt";
+    private static final String votesFilePath = "data/votes.txt";
+    private static final String votersFilePath = "data/voters.txt";
+    private static final String logFilePath = "data/audit_log.txt";
 
     public static boolean voterExists(String voterId) {
         try (BufferedReader reader = new BufferedReader(new FileReader(votersFilePath))) {

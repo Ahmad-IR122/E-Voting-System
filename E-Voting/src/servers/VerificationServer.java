@@ -47,10 +47,10 @@ public class VerificationServer extends UnicastRemoteObject implements Verificat
         try {
             VerificationServer server = new VerificationServer();
 
-            Registry registry = LocateRegistry.createRegistry(2000);
+            Registry registry = LocateRegistry.createRegistry(3000);
             registry.rebind("VerificationService", server);
 
-            System.out.println("Verification Server running on port 2000...");
+            System.out.println("Verification Server running on port 3000...");
 
         } catch (Exception e) {
             e.printStackTrace();

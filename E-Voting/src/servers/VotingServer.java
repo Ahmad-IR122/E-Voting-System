@@ -61,7 +61,7 @@ public class VotingServer implements VotingService {
             }
 
 
-            Registry registry = LocateRegistry.getRegistry("localhost", 2000);
+            Registry registry = LocateRegistry.getRegistry("localhost", 3000);
             VerificationService verificationService =
                     (VerificationService) registry.lookup("VerificationService");
 
@@ -91,7 +91,7 @@ public class VotingServer implements VotingService {
 
         try {
             VotingServer server = new VotingServer();
-            VotingService stub = (VotingService) UnicastRemoteObject.exportObject(server, 0);
+            VotingService stub = (VotingService) UnicastRemoteObject.exportObject(server, 3000);
             Registry registry;
             try {
                 registry = LocateRegistry.createRegistry(3000);
