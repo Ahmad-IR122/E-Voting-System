@@ -15,9 +15,23 @@ import java.security.PublicKey;
 
 public class VotingServer implements VotingService {
 
+    private static boolean isBlank(String value) {
+        return value == null || value.trim().isEmpty();
+    }
+
     @Override
     public String castVote(Vote vote) throws RemoteException {
         try{
+
+            if (vote == null) {
+                return "Invalid vote payload.";
+            }
+
+            if (isBlank(vote.getVoterID()) || isBlank(vote.getCandidateName())
+                    || isBlank(vote.getTimestamp()) || isBlank(vote.getHash())
+                    || isBlank(vote.getSignature())) {
+                return "Incomplete vote data.";
+            }
 
             String voteID = vote.getVoterID();
             if(!FileUtil.voterExists(voteID)) {
@@ -63,9 +77,12 @@ public class VotingServer implements VotingService {
 
             return "Vote recorded successfully";
 
-        } catch (RuntimeException | NotBoundException e) {
-            System.out.println("Error processing vote: " + e.getMessage());
-            throw new RuntimeException(e);
+        } catch (NotBoundException e) {
+            FileUtil.writeAuditLog("Verification service is unavailable: " + e.getMessage());
+            throw new RemoteException("Verification service is unavailable.", e);
+        } catch (Exception e) {
+            FileUtil.writeAuditLog("Error processing vote: " + e.getMessage());
+            throw new RemoteException("Error processing vote.", e);
         }
 
     }
@@ -75,14 +92,19 @@ public class VotingServer implements VotingService {
         try {
             VotingServer server = new VotingServer();
             VotingService stub = (VotingService) UnicastRemoteObject.exportObject(server, 0);
-            Registry registry = LocateRegistry.createRegistry(3000);
-            registry.bind("VotingService", stub);
+            Registry registry;
+            try {
+                registry = LocateRegistry.createRegistry(3000);
+            } catch (RemoteException e) {
+                registry = LocateRegistry.getRegistry(3000);
+            }
+            registry.rebind("VotingService", stub);
             System.out.println("Voting Server is running...");
 
         } catch (Exception e) {
-            System.err.println("Failed to verify or generate signature in SignatureUtil:");
+            System.err.println("Failed to start VotingServer:");
             e.printStackTrace();
-            throw new RuntimeException("Failed to verify or generate signature", e);
+            throw new RuntimeException("Failed to start VotingServer", e);
         }
 
 

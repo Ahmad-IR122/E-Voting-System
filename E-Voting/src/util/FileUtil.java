@@ -1,7 +1,5 @@
 package util;
-
 import model.Vote;
-
 import java.io.*;
 import java.time.LocalDateTime;
 import java.nio.file.*;
@@ -9,16 +7,12 @@ import java.util.ArrayList;
 import java.util.List;
 public class FileUtil {
 
-    private static final String votesFilePath = "src/data/votes.txt";
-    private static final String votersFilePath = "src/data/voters.txt";
-    private static final String logFilePath = "src/data/audit_log.txt";
+    private static final String votesFilePath = "util/votes.txt";
+    private static final String votersFilePath = "util/voters.txt";
+    private static final String logFilePath = "util/audit_log.txt";
 
-    public static boolean fileExists(String filePath) {
-        File file = new File(filePath);
-        return file.exists() && file.isFile();
-    }
     public static boolean voterExists(String voterId) {
-        try (BufferedReader reader = new BufferedReader(new FileReader(votesFilePath))) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(votersFilePath))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 String[] parts = line.split(",");

@@ -66,12 +66,6 @@ public class Vote implements Serializable {
 
     @Override
     public String toString() {
-        return "Vote{" +
-                "voterID='" + voterID + '\'' +
-                ", candidateName='" + candidateName + '\'' +
-                ", timestamp='" + timestamp + '\'' +
-                ", hash='" + hash + '\'' +
-                ", signature='" + signature + '\'' +
-                '}';
+        return voterID + "," + candidateName + "," + timestamp + "," + hash + "," + signature;
     }
 }
