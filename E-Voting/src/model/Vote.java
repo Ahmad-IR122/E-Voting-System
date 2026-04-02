@@ -1,6 +1,7 @@
 package model;
+import java.io.Serializable;
 
-public class Vote {
+public class Vote implements Serializable {
     private String voterID;
     private String candidateName;
     private String timestamp;

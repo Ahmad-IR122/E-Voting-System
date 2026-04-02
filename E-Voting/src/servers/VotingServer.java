@@ -1,5 +1,7 @@
 package servers;
 
+import model.Vote;
+
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
@@ -8,12 +10,17 @@ import java.rmi.server.UnicastRemoteObject;
 public class VotingServer implements VotingService {
 
     @Override
-    public String castVote(String voterId, String candidate) throws RemoteException {
-        return "";
+    public String castVote(Vote vote) throws RemoteException {
+        System.out.println("Received vote from voter ID: " + vote.getVoterID()
+                + " \nfor candidate: " + vote.getCandidateName() +
+                "\n at " + vote.getTimestamp() + " \nwith hash: " +
+                vote.getHash() + "\n and signature: " + vote.getSignature());
+        return "vote received successfully";
     }
-    public static void main(String[] args) {
 
-        try{
+    public static void main(String[] args ) {
+
+        try {
             VotingServer server = new VotingServer();
             VotingService stub = (VotingService) UnicastRemoteObject.exportObject(server, 0);
             Registry registry = LocateRegistry.createRegistry(3000);
@@ -28,7 +35,6 @@ public class VotingServer implements VotingService {
 
 
     }
-
 
 
 }

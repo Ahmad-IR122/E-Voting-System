@@ -1,8 +1,13 @@
 package client;
 
+import model.Vote;
+import servers.VotingService;
 import util.HashUtil;
 import util.SignatureUtil;
 
+import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
 import java.time.LocalDateTime;
 import java.util.Scanner;
 import java.util.regex.Pattern;
@@ -34,16 +39,26 @@ public class VotingClient {
         System.out.print("Enter the candidate you want to vote for: ");
         String candidate = scanner.nextLine().trim();
         String timestamp = LocalDateTime.now().toString();
-        System.out.println("Casting vote for " + candidate + " at " + timestamp);
         String VoteData = voterId + "|" + candidate + "|" + timestamp;
         String hash = HashUtil.generateHash(VoteData);
         String signature = SignatureUtil.generateSignature(VoteData);
         // Here you would call the VotingService to cast the vote
         // For example: votingService.castVote(voterId, candidate);
-        System.out.println("Vote data: " + VoteData + "\n");
-        System.out.println("Vote cast successfully!");
-        System.out.println("Vote Hash: " + hash);
-        System.out.println("Vote Signature: " + signature);
+        Vote vote = new Vote(voterId, candidate, timestamp, hash, signature);
+        try {
+            Registry registry = LocateRegistry.getRegistry("localhost", 3000);
+            VotingService votingService = (VotingService) registry.lookup("VotingService");
+
+            String response = votingService.castVote(vote);
+            System.out.println("Response from server: " + response);
+
+        } catch (java.rmi.NotBoundException e) {
+            System.out.println("Service 'VotingService' is not bound in the registry.");
+            e.printStackTrace();
+        } catch (RemoteException e) {
+            System.out.println("RMI connection error: " + e.getMessage());
+            e.printStackTrace();
+        }
         scanner.close();
 
 
