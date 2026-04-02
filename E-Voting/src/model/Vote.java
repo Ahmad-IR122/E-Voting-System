@@ -1,6 +1,7 @@
 package model;
+import java.io.Serializable;
 
-public class Vote {
+public class Vote implements Serializable {
     private String voterID;
     private String candidateName;
     private String timestamp;
@@ -65,12 +66,6 @@ public class Vote {
 
     @Override
     public String toString() {
-        return "Vote{" +
-                "voterID='" + voterID + '\'' +
-                ", candidateName='" + candidateName + '\'' +
-                ", timestamp='" + timestamp + '\'' +
-                ", hash='" + hash + '\'' +
-                ", signature='" + signature + '\'' +
-                '}';
+        return voterID + "," + candidateName + "," + timestamp + "," + hash + "," + signature;
     }
 }

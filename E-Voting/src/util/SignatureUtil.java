@@ -6,6 +6,22 @@ import java.util.Base64;
 
 public class SignatureUtil {
 
+
+    public static boolean verifySignature(String data, String signature, PublicKey publicKey) {
+        try {
+            Signature sig = Signature.getInstance("SHA256withRSA");
+            sig.initVerify(publicKey);
+            sig.update(data.getBytes());
+
+            byte[] signatureBytes = Base64.getDecoder().decode(signature);
+            return sig.verify(signatureBytes);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
     public static String generateSignature(String data) {
         try {
             KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
