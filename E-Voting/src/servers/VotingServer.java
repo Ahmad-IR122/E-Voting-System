@@ -34,11 +34,15 @@ public class VotingServer implements VotingService {
             }
 
             String voteID = vote.getVoterID();
-            if(!FileUtil.voterExists(voteID)) {
+            if(FileUtil.voterExists(voteID)) {
                 return "Invalid voter ID";
             }
+                System.out.println("Received vote from voter ID: " + voteID + " for candidate: " + vote.getCandidateName());
+                FileUtil.saveVote(vote);
+
 
             if(FileUtil.hasAlreadyVoted(voteID)){
+                System.out.println("Voter ID: " + voteID + " has already voted.");
                 return "You have already voted.";
             }
 
@@ -71,7 +75,7 @@ public class VotingServer implements VotingService {
                 FileUtil.writeAuditLog("Verification failed for voter: " + voteID);
                 return "Vote rejected (verification failed)";
             }
-            FileUtil.saveVote(vote);
+
 
             FileUtil.markVoterAsVoted(voteID);
 
