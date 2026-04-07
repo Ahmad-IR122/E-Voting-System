@@ -9,3 +9,7 @@
 [2026-04-06T01:15:53.339094200] Verification service is unavailable: VerificationService
 [2026-04-07T01:11:48.666214] Invalid signature for voter: 7512
 [2026-04-07T01:16:21.959667100] Invalid signature for voter: 6775
+[2026-04-07T21:13:42.119088200] Invalid signature for voter: 5765
+[2026-04-07T21:30:49.793516300] Invalid signature for voter: 5489
+[2026-04-07T21:32:40.955783900] Invalid signature for voter: 5599
+[2026-04-07T22:23:09.887026300] Invalid signature for voter: 1001

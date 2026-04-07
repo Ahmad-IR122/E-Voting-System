@@ -1,48 +1,23 @@
 package util;
 
 import java.nio.charset.StandardCharsets;
-import java.security.*;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.Signature;
 import java.util.Base64;
 
 public class SignatureUtil {
 
-
-    public static boolean verifySignature(String data, String signature, PublicKey publicKey) {
-        try {
-            Signature sig = Signature.getInstance("SHA256withRSA");
-            sig.initVerify(publicKey);
-            sig.update(data.getBytes());
-
-            byte[] signatureBytes = Base64.getDecoder().decode(signature);
-            return sig.verify(signatureBytes);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
     public static String generateSignature(String data) {
         try {
-            KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
-            keyGen.initialize(2048);
-            KeyPair pair = keyGen.generateKeyPair();
-            PrivateKey privateKey = pair.getPrivate();
-            PublicKey publicKey = pair.getPublic();
+            PrivateKey privateKey = KeyManager.getPrivateKey();
 
-            Signature privateSignature = Signature.getInstance("SHA256withRSA");
-            privateSignature.initSign(privateKey);
-            privateSignature.update(data.getBytes(StandardCharsets.UTF_8));
-            byte[] signature = privateSignature.sign();
+            Signature signature = Signature.getInstance("SHA256withRSA");
+            signature.initSign(privateKey);
+            signature.update(data.getBytes(StandardCharsets.UTF_8));
 
-            Signature publicSignature = Signature.getInstance("SHA256withRSA");
-            publicSignature.initVerify(publicKey);
-            publicSignature.update(data.getBytes(StandardCharsets.UTF_8));
-            boolean isCorrect = publicSignature.verify(signature);
-
-            System.out.println("Signature correct: " + isCorrect);
-
-            return Base64.getEncoder().encodeToString(signature);
+            byte[] signedBytes = signature.sign();
+            return Base64.getEncoder().encodeToString(signedBytes);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -50,5 +25,18 @@ public class SignatureUtil {
         }
     }
 
+    public static boolean verifySignature(String data, String signatureStr, PublicKey publicKey) {
+        try {
+            Signature signature = Signature.getInstance("SHA256withRSA");
+            signature.initVerify(publicKey);
+            signature.update(data.getBytes(StandardCharsets.UTF_8));
 
+            byte[] signatureBytes = Base64.getDecoder().decode(signatureStr);
+            return signature.verify(signatureBytes);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 }

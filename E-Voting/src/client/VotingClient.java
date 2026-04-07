@@ -3,6 +3,7 @@ package client;
 import model.Vote;
 import servers.VotingService;
 import util.HashUtil;
+import util.KeyManager;
 import util.SignatureUtil;
 
 import java.rmi.RemoteException;
@@ -13,13 +14,15 @@ import java.util.Scanner;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
-
 public class VotingClient {
     public static void main(String[] args) {
         System.out.println("Welcome to the E-Voting System!");
         Scanner scanner = new Scanner(System.in);
+
         System.out.print("Enter your Voter ID: ");
+        System.out.println("Note: Voter ID must be a 4-digit number (e.g., 1234).");
         String voterId = scanner.nextLine().trim();
+
         String regex = "^[0-9]{4}$";
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(voterId);
@@ -34,16 +37,21 @@ public class VotingClient {
                 voterId = scanner.nextLine().trim();
                 matcher = pattern.matcher(voterId);
             }
-
         }
+
         System.out.print("Enter the candidate you want to vote for: ");
         String candidate = scanner.nextLine().trim();
+
         String timestamp = LocalDateTime.now().toString();
-        String VoteData = voterId + "|" + candidate + "|" + timestamp;
-        String hash = HashUtil.generateHash(VoteData);
-        String signature = SignatureUtil.generateSignature(VoteData);
+        String voteData = voterId + "|" + candidate + "|" + timestamp;
+
+
+
+        String hash = HashUtil.generateHash(voteData);
+        String signature = SignatureUtil.generateSignature(voteData);
 
         Vote vote = new Vote(voterId, candidate, timestamp, hash, signature);
+
         try {
             Registry registry = LocateRegistry.getRegistry("localhost", 3000);
             VotingService votingService = (VotingService) registry.lookup("VotingService");
@@ -57,9 +65,7 @@ public class VotingClient {
             System.out.println("RMI connection error: " + e.getMessage());
             e.printStackTrace();
         }
+
         scanner.close();
-
-
-
     }
 }

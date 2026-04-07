@@ -46,6 +46,9 @@ public class VerificationServer extends UnicastRemoteObject implements Verificat
 
     public static void main(String[] args) {
         try {
+            KeyManager.generateAndSaveKeysIfNotExist();
+            KeyManager.printKeyPaths();
+
             VerificationServer server = new VerificationServer();
 
             Registry registry = LocateRegistry.createRegistry(2000);
