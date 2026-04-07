@@ -166,12 +166,6 @@ To contribute:
 4. Test your changes
 5. Open a pull request
 
-If this is a personal or academic project and you do not want outside contributions yet, replace this section with:
-
-```md
-Contributions are currently not open.
-```
-
 ## 👤 Author / Contact
 
 - **Name:** `Ahmad Irshaid`
