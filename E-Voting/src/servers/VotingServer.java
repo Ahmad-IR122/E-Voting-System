@@ -21,8 +21,7 @@ public class VotingServer implements VotingService {
 
     @Override
     public String castVote(Vote vote) throws RemoteException {
-        try{
-
+        try {
             if (vote == null) {
                 return "Invalid vote payload.";
             }
@@ -34,21 +33,24 @@ public class VotingServer implements VotingService {
             }
 
             String voteID = vote.getVoterID();
-            if(!FileUtil.voterExists(voteID)) {
+
+            if (!FileUtil.voterExists(voteID)) {
                 return "Invalid voter ID";
             }
 
-            if(FileUtil.hasAlreadyVoted(voteID)){
+            if (FileUtil.hasAlreadyVoted(voteID)) {
+                System.out.println("Voter ID: " + voteID + " has already voted.");
                 return "You have already voted.";
             }
 
             String voteData = vote.getVoterID() + "|" + vote.getCandidateName() + "|" + vote.getTimestamp();
             String newHash = HashUtil.generateHash(voteData);
-            if(!newHash.equals(vote.getHash())){
+
+            if (!newHash.equals(vote.getHash())) {
                 return "Vote data integrity compromised.";
             }
-            PublicKey publicKey = KeyManager.getPublicKey();
 
+            PublicKey publicKey = KeyManager.getPublicKey();
             boolean isSignatureValid = SignatureUtil.verifySignature(
                     voteData,
                     vote.getSignature(),
@@ -60,8 +62,7 @@ public class VotingServer implements VotingService {
                 return "Invalid signature!";
             }
 
-
-            Registry registry = LocateRegistry.getRegistry("localhost", 3000);
+            Registry registry = LocateRegistry.getRegistry("localhost", 2000);
             VerificationService verificationService =
                     (VerificationService) registry.lookup("VerificationService");
 
@@ -71,8 +72,8 @@ public class VotingServer implements VotingService {
                 FileUtil.writeAuditLog("Verification failed for voter: " + voteID);
                 return "Vote rejected (verification failed)";
             }
-            FileUtil.saveVote(vote);
 
+            FileUtil.saveVote(vote);
             FileUtil.markVoterAsVoted(voteID);
 
             return "Vote recorded successfully";
@@ -84,12 +85,12 @@ public class VotingServer implements VotingService {
             FileUtil.writeAuditLog("Error processing vote: " + e.getMessage());
             throw new RemoteException("Error processing vote.", e);
         }
-
     }
-
     public static void main(String[] args ) {
-
         try {
+            KeyManager.generateAndSaveKeysIfNotExist();
+            KeyManager.printKeyPaths();
+
             VotingServer server = new VotingServer();
             VotingService stub = (VotingService) UnicastRemoteObject.exportObject(server, 3000);
             Registry registry;
@@ -106,8 +107,6 @@ public class VotingServer implements VotingService {
             e.printStackTrace();
             throw new RuntimeException("Failed to start VotingServer", e);
         }
-
-
     }
 
 

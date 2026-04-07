@@ -3,6 +3,7 @@ package servers;
 import model.Vote;
 import util.HashUtil;
 import util.KeyManager;
+import util.SignatureUtil;
 
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -25,7 +26,7 @@ public class VerificationServer extends UnicastRemoteObject implements Verificat
                 return false;
             }
             PublicKey publicKey = KeyManager.getPublicKey();
-            boolean isSignatureValid = util.SignatureUtil.verifySignature(
+            boolean isSignatureValid = SignatureUtil.verifySignature(
                     voteData,
                     vote.getSignature(),
                     publicKey
@@ -45,12 +46,15 @@ public class VerificationServer extends UnicastRemoteObject implements Verificat
 
     public static void main(String[] args) {
         try {
+            KeyManager.generateAndSaveKeysIfNotExist();
+            KeyManager.printKeyPaths();
+
             VerificationServer server = new VerificationServer();
 
-            Registry registry = LocateRegistry.createRegistry(3000);
+            Registry registry = LocateRegistry.createRegistry(2000);
             registry.rebind("VerificationService", server);
 
-            System.out.println("Verification Server running on port 3000...");
+            System.out.println("Verification Server running on port 2000...");
 
         } catch (Exception e) {
             e.printStackTrace();
