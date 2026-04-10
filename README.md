@@ -1,6 +1,6 @@
 # 🗳️ E-Voting System
 
-> A simple Java-based electronic voting system focused on vote integrity, verification, and secure record handling.
+> A Java-based electronic voting system focused on vote integrity, verification, and secure record handling.
 
 ![Java](https://img.shields.io/badge/Java-22-orange?style=for-the-badge&logo=openjdk)
 ![Platform](https://img.shields.io/badge/Platform-Console%20App-blue?style=for-the-badge)
@@ -9,61 +9,83 @@
 
 ## 📖 Overview
 
-This project is a Java-based e-voting application built with **Java RMI**. It allows a voter to submit a vote through a client application, sends that vote to a voting server, and validates the vote through a separate verification server before saving it.
+This project is a console-based Java e-voting application built with **Java RMI**. A voter submits a vote through a client application; the vote is forwarded to a voting server, which validates it and forwards it to a separate verification server before the vote is permanently saved.
 
-The system is designed around a few core ideas:
+The system is designed around a few core principles:
 
-- Validate the voter before accepting a vote
+- Validate the voter's identity before accepting a vote
 - Prevent duplicate voting
 - Check vote integrity using **SHA-256 hashing**
-- Verify authenticity using **RSA digital signatures**
+- Verify authenticity using **RSA digital signatures** (2048-bit, auto-generated on first run)
 - Store votes and audit logs in local text files
-
-This repository appears to be a console-based Java application rather than a web or mobile app.
 
 ## ✨ Features
 
-- Secure vote submission through a Java client
-- Separate **Voting Server** and **Verification Server**
-- Voter ID validation before vote processing
+- Secure vote submission through a Java RMI client
+- Separate **Voting Server** and **Verification Server** communicating over RMI
+- Voter ID validation against a local registry before vote processing
 - Duplicate vote prevention
 - Vote integrity check using SHA-256 hashing
 - Digital signature generation and verification using RSA
-- Audit logging for failed verification and server issues
+- Audit logging for failed verifications and server errors
 - Flat-file data storage for voters, votes, and logs
 
 ## 🛠️ Tech Stack
 
-- **Language:** Java
-- **Architecture:** Java RMI
-- **Security:** SHA-256, RSA, Base64
-- **Data Storage:** Text files
-- **Build/Run Style:** Manual `javac` / `java` commands
-- **IDE:** [Add IDE name if you want to mention it]
+| Area | Technology |
+|------|-----------|
+| Language | Java 22 |
+| Architecture | Java RMI |
+| Security | SHA-256, RSA 2048-bit, Base64 |
+| Data Storage | Plain text files |
+| Build | Manual `javac` / `java` commands |
 
 ## 📦 Installation
 
 ### Prerequisites
 
 - Java JDK 22 or newer
-- A terminal or IDE that can run Java applications
+- A terminal or IDE that supports running Java applications
 
 ### Clone the repository
 
 ```bash
-git clone [Add repository URL]
+git clone https://github.com/Ahmad-IR122/E-Voting-System.git
 cd E-Voting-System
 ```
 
 ### Compile the project
 
+First, create the output directory:
+
 ```bash
+mkdir -p out          # Linux / macOS
+mkdir out             # Windows
+```
+
+Then compile all sources:
+
+**Linux / macOS**
+```bash
+find E-Voting/src -name "*.java" | xargs javac -d out
+```
+
+**Windows (PowerShell)**
+```powershell
 javac -d out (Get-ChildItem -Recurse E-Voting\src -Filter *.java | ForEach-Object { $_.FullName })
 ```
 
+**Windows (Command Prompt)**
+```cmd
+for /r E-Voting\src %f in (*.java) do @set SOURCES=%SOURCES% "%f"
+javac -d out %SOURCES%
+```
+
+> **Note:** RSA key pairs are generated automatically in `src/data/keys/` the first time either server starts. No manual key setup is required.
+
 ## 🚀 Usage
 
-Run the services in this order:
+Run the three components **in this order** — each in its own terminal:
 
 ### 1. Start the Verification Server
 
@@ -83,15 +105,15 @@ java -cp out servers.VotingServer
 java -cp out client.VotingClient
 ```
 
-### Basic flow
+### Vote submission flow
 
-- Enter a **4-digit voter ID**
-- Enter the candidate name
-- The client creates vote data with a timestamp
-- The system hashes and signs the vote
-- The voting server checks the voter and prevents duplicate voting
-- The verification server validates the hash and signature
-- The vote is stored if all checks pass
+1. Enter a **voter ID** (must exist in `voters.txt`)
+2. Enter the candidate name
+3. The client builds a vote record with a timestamp, then hashes and signs it
+4. The voting server checks voter validity and prevents duplicate voting
+5. The voting server independently verifies the hash and signature
+6. The vote is forwarded to the verification server for a second check
+7. If both checks pass, the vote is saved to `votes.txt`
 
 ## 🗂️ Project Structure
 
@@ -100,65 +122,59 @@ E-Voting-System/
 ├── E-Voting/
 │   └── src/
 │       ├── client/
-│       │   └── VotingClient.java
+│       │   └── VotingClient.java        # Entry point for voters
 │       ├── model/
-│       │   └── Vote.java
+│       │   └── Vote.java                # Vote data model
 │       ├── servers/
-│       │   ├── VerificationServer.java
-│       │   ├── VerificationService.java
-│       │   ├── VotingServer.java
-│       │   └── VotingService.java
+│       │   ├── VerificationServer.java  # Verification server (port 2000)
+│       │   ├── VerificationService.java # RMI interface for verification
+│       │   ├── VotingServer.java        # Voting server (port 3000)
+│       │   └── VotingService.java       # RMI interface for voting
 │       ├── util/
-│       │   ├── FileUtil.java
-│       │   ├── HashUtil.java
-│       │   ├── KeyManager.java
-│       │   └── SignatureUtil.java
+│       │   ├── FileUtil.java            # File I/O helpers
+│       │   ├── HashUtil.java            # SHA-256 hashing
+│       │   ├── KeyManager.java          # RSA key generation & loading
+│       │   └── SignatureUtil.java       # RSA sign & verify
 │       └── data/
-│           ├── audit_log.txt
-│           ├── voters.txt
-│           └── votes.txt
-├── out/
-├── src/
-│   └── data/
-│       └── keys/
-│           ├── private.key
-│           └── public.key
+│           ├── audit_log.txt            # Timestamped failure log
+│           ├── voters.txt               # Voter registry (format: ID|hasVoted)
+│           └── votes.txt                # Accepted vote records
+├── out/                                 # Compiled .class files (generated)
 └── README.md
 ```
 
-## 🔌 API Endpoints / Main Functionality
+> **voters.txt format:** Each line follows `<voterID>|<hasVoted>`, for example `1234|false`. The `hasVoted` flag is updated to `true` once a vote is accepted.
 
-This project does not expose REST API endpoints. It uses **Java RMI remote services** instead.
+## 🔌 RMI Services
 
-### Main remote services
+This project uses **Java RMI** instead of REST endpoints.
 
-- `VotingService.castVote(Vote vote)`
-  Accepts a vote from the client and processes it through validation and verification.
-
-- `VerificationService.verifyVote(Vote vote)`
-  Checks the vote hash and digital signature before the vote is accepted.
+| Service | Method | Description |
+|---------|--------|-------------|
+| `VotingService` | `castVote(Vote vote)` | Accepts a vote from the client, validates it, and coordinates with the verification server |
+| `VerificationService` | `verifyVote(Vote vote)` | Re-checks the vote hash and digital signature |
 
 ### Default ports
 
-- `VerificationServer`: `2000`
-- `VotingServer`: `3000`
+| Component | Port |
+|-----------|------|
+| Verification Server | `2000` |
+| Voting Server | `3000` |
 
 ## 🔮 Future Improvements
 
 - Add a graphical user interface
 - Replace text-file storage with a database
 - Add admin controls and election management
-- Improve voter authentication beyond a 4-digit ID
-- Add encryption for stored vote data
+- Strengthen voter authentication beyond a simple ID
+- Encrypt stored vote data at rest
 - Add automated tests
 - Add result tallying and reporting
-- Package the application with a proper build tool like Maven or Gradle
+- Package the application with Maven or Gradle
 
 ## 🤝 Contributing
 
 Contributions are welcome.
-
-To contribute:
 
 1. Fork the repository
 2. Create a new branch
@@ -168,13 +184,17 @@ To contribute:
 
 ## 👤 Author / Contact
 
-- **Name:** `Ahmad Irshaid`
-- **Email:** `irsheidahmad094@gmail.com`
+- **Name:** Ahmad Irshaid
+- **Email:** irsheidahmad094@gmail.com
 
 ---
+
 ## 📘 Course Information
-- **Course:** `Web Services Security`
-- **Semester:** `Second Semester 2025/2022`
-- **University Assignment:** `Home Work Project`
-- **Programming language** `JAVA`
-- **Instructor :** `Amjad W. Hawash`
+
+| Field | Value |
+|-------|-------|
+| Course | Web Services Security |
+| Semester | Second Semester 2024/2025 |
+| Assignment Type | Homework Project |
+| Language | Java |
+| Instructor | Amjad W. Hawash |
