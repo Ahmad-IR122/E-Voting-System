@@ -3,7 +3,6 @@ package client;
 import model.Vote;
 import servers.VotingService;
 import util.HashUtil;
-import util.KeyManager;
 import util.SignatureUtil;
 
 import java.rmi.RemoteException;
@@ -12,60 +11,77 @@ import java.rmi.registry.Registry;
 import java.time.LocalDateTime;
 import java.util.Scanner;
 import java.util.regex.Pattern;
-import java.util.regex.Matcher;
 
 public class VotingClient {
+
+    private static final String HOST = "localhost";
+    private static final int PORT = 3000;
+    private static final String SERVICE_NAME = "VotingService";
+    private static final Pattern VOTER_ID_PATTERN = Pattern.compile("^\\d{4}$");
+
     public static void main(String[] args) {
         System.out.println("Welcome to the E-Voting System!");
-        Scanner scanner = new Scanner(System.in);
 
-        System.out.print("Enter your Voter ID: ");
-        System.out.println("Note: Voter ID must be a 4-digit number (e.g., 1234).");
-        String voterId = scanner.nextLine().trim();
+        try (Scanner scanner = new Scanner(System.in)) {
+            String voterId = getValidVoterId(scanner);
+            String candidate = getValidCandidate(scanner);
 
-        String regex = "^[0-9]{4}$";
-        Pattern pattern = Pattern.compile(regex);
-        Matcher matcher = pattern.matcher(voterId);
-
-        while (true) {
-            if (matcher.matches()) {
-                System.out.println("Voter ID is valid.");
-                break;
-            } else {
-                System.out.println("Invalid Voter ID. Please enter a 4-digit number.");
-                System.out.print("Enter your Voter ID: ");
-                voterId = scanner.nextLine().trim();
-                matcher = pattern.matcher(voterId);
-            }
+            Vote vote = buildVote(voterId, candidate);
+            submitVote(vote);
+        } catch (Exception e) {
+            System.out.println("Unexpected error: " + e.getMessage());
+            e.printStackTrace();
         }
+    }
 
-        System.out.print("Enter the candidate you want to vote for: ");
-        String candidate = scanner.nextLine().trim();
+    private static String getValidVoterId(Scanner scanner) {
+        while (true) {
+            System.out.print("Enter your Voter ID: ");
+            String voterId = scanner.nextLine().trim();
 
+            if (VOTER_ID_PATTERN.matcher(voterId).matches()) {
+                System.out.println("Voter ID is valid.");
+                return voterId;
+            }
+
+            System.out.println("Invalid Voter ID. Please enter a 4-digit number.");
+        }
+    }
+
+    private static String getValidCandidate(Scanner scanner) {
+        while (true) {
+            System.out.print("Enter the candidate you want to vote for: ");
+            String candidate = scanner.nextLine().trim();
+
+            if (!candidate.isEmpty()) {
+                return candidate;
+            }
+
+            System.out.println("Candidate name cannot be empty.");
+        }
+    }
+
+    private static Vote buildVote(String voterId, String candidate) {
         String timestamp = LocalDateTime.now().toString();
         String voteData = voterId + "|" + candidate + "|" + timestamp;
-
-
-
         String hash = HashUtil.generateHash(voteData);
         String signature = SignatureUtil.generateSignature(voteData);
 
-        Vote vote = new Vote(voterId, candidate, timestamp, hash, signature);
+        return new Vote(voterId, candidate, timestamp, hash, signature);
+    }
 
+    private static void submitVote(Vote vote) {
         try {
-            Registry registry = LocateRegistry.getRegistry("localhost", 3000);
-            VotingService votingService = (VotingService) registry.lookup("VotingService");
+            Registry registry = LocateRegistry.getRegistry(HOST, PORT);
+            VotingService votingService = (VotingService) registry.lookup(SERVICE_NAME);
+
             String response = votingService.castVote(vote);
             System.out.println("Response from server: " + response);
 
         } catch (java.rmi.NotBoundException e) {
-            System.out.println("Service 'VotingService' is not bound in the registry.");
-            e.printStackTrace();
+            System.out.println("Service '" + SERVICE_NAME + "' is not bound in the registry.");
         } catch (RemoteException e) {
             System.out.println("RMI connection error: " + e.getMessage());
-            e.printStackTrace();
         }
-
-        scanner.close();
     }
 }

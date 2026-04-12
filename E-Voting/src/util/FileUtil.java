@@ -9,6 +9,7 @@ import java.nio.file.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public class FileUtil {
@@ -61,27 +62,29 @@ public class FileUtil {
             System.out.println("Looking for voter ID: [" + voterId + "]");
             System.out.println("Reading voters file from: " + votersFilePath.toAbsolutePath());
 
-            try (BufferedReader reader = Files.newBufferedReader(votersFilePath, StandardCharsets.UTF_8)) {
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    System.out.println("Line read: [" + line + "]");
+            String normalizedVoterId = voterId == null ? "" : voterId.trim();
+            if (normalizedVoterId.isEmpty()) {
+                return false;
+            }
 
-                    String cleanedLine = line.trim();
-                    if (cleanedLine.isEmpty()) {
-                        continue;
-                    }
-
-                    String[] parts = cleanedLine.split("\\|");
-                    if (parts.length >= 1) {
-                        String fileVoterId = parts[0].trim();
-                        System.out.println("Parsed voter ID from file: [" + fileVoterId + "]");
-
-                        if (fileVoterId.equals(voterId.trim())) {
-                            System.out.println("MATCH FOUND");
-                            return true;
-                        }
-                    }
+            List<String> voterIds = new ArrayList<>();
+            for (String line : Files.readAllLines(votersFilePath, StandardCharsets.UTF_8)) {
+                String cleanedLine = line.trim();
+                if (cleanedLine.isEmpty()) {
+                    continue;
                 }
+
+                String[] parts = cleanedLine.split("\\|");
+                if (parts.length >= 1) {
+                    voterIds.add(parts[0].trim());
+                }
+            }
+
+            Collections.sort(voterIds);
+
+            if (Collections.binarySearch(voterIds, normalizedVoterId) >= 0) {
+                System.out.println("MATCH FOUND");
+                return true;
             }
         } catch (IOException e) {
             e.printStackTrace();

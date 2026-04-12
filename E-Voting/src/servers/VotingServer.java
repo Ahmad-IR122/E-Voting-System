@@ -73,8 +73,15 @@ public class VotingServer implements VotingService {
                 return "Vote rejected (verification failed)";
             }
 
+            System.out.println("Before saving vote...");
+
             FileUtil.saveVote(vote);
+
+            System.out.println("Vote saved successfully.");
+
             FileUtil.markVoterAsVoted(voteID);
+
+            System.out.println("Voter marked as voted.");
 
             return "Vote recorded successfully";
 
@@ -86,7 +93,8 @@ public class VotingServer implements VotingService {
             throw new RemoteException("Error processing vote.", e);
         }
     }
-    public static void main(String[] args ) {
+
+    public static void main(String[] args) {
         try {
             KeyManager.generateAndSaveKeysIfNotExist();
             KeyManager.printKeyPaths();
@@ -100,7 +108,7 @@ public class VotingServer implements VotingService {
                 registry = LocateRegistry.getRegistry(3000);
             }
             registry.rebind("VotingService", stub);
-            System.out.println("Voting Server is running...");
+            System.out.println("Voting Server is running on port 3000...");
 
         } catch (Exception e) {
             System.err.println("Failed to start VotingServer:");
