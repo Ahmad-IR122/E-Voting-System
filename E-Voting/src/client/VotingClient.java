@@ -52,7 +52,6 @@ public class VotingClient {
         while (true) {
             System.out.print("Enter the candidate you want to vote for: ");
             String candidate = scanner.nextLine().trim();
-
             if (!candidate.isEmpty()) {
                 return candidate;
             }
